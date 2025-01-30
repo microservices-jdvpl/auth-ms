@@ -10,7 +10,7 @@ export class AuthController {
 
   @MessagePattern('auth.register.user')
   registerUser(@Payload() createUsertDto: RegisterUserDto) {
-    return createUsertDto;
+    return this.authService.registerUser(createUsertDto);
   }
   @MessagePattern('auth.login.user')
   loginUser(@Payload() loginUsertDto: LoginUserDto) {

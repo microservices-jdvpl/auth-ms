@@ -1,5 +1,4 @@
 import {
-  IsDate,
   IsEmail,
   IsPhoneNumber,
   IsString,
@@ -12,9 +11,6 @@ export class RegisterUserDto {
 
   @IsPhoneNumber()
   cellPhone: string;
-
-  @IsDate()
-  birthDate: Date;
 
   @IsString()
   @IsEmail()
