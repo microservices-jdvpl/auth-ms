@@ -14,7 +14,7 @@ export class AuthController {
   }
   @MessagePattern('auth.login.user')
   loginUser(@Payload() loginUsertDto: LoginUserDto) {
-    return loginUsertDto;
+    return this.authService.loginUser(loginUsertDto);
   }
   @MessagePattern('auth.verify.user')
   verifyUser(@Payload() createUsertDto: any) {

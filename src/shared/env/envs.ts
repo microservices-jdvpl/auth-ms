@@ -5,6 +5,7 @@ import * as joi from 'joi';
 interface IEnvs {
   NATS_SERVERS: string[];
   MONGODB_URL: string;
+  JWT_SECRET: string;
 }
 
 const envsSchema = joi
@@ -28,4 +29,5 @@ const envVars: IEnvs = value;
 export const envs = {
   NATS_SERVERS: envVars.NATS_SERVERS,
   MONGODB_URL: envVars.MONGODB_URL,
+  JWT_SECRET: envVars.JWT_SECRET,
 };

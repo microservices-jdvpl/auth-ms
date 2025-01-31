@@ -2,14 +2,24 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { RpcException } from '@nestjs/microservices';
-
+import * as bcrypt from 'bcrypt';
+import { LoginUserDto } from './dto/login-user.dto';
+import { JwtService } from '@nestjs/jwt';
+import { JwtPayload } from './interfaces/jwt-payload.interface';
 @Injectable()
 export class AuthService extends PrismaClient implements OnModuleInit {
   private logger = new Logger(AuthService.name);
 
+  constructor(private jwtService: JwtService) {
+    super();
+  }
   onModuleInit() {
     this.$connect();
     this.logger.debug('Connected to the database');
+  }
+
+  async signJwtToken(payload: JwtPayload) {
+    return this.jwtService.sign(payload);
   }
 
   async registerUser(registerUserDto: RegisterUserDto) {
@@ -29,12 +39,52 @@ export class AuthService extends PrismaClient implements OnModuleInit {
       const user = await this.user.create({
         data: {
           email: registerUserDto.email,
-          password: registerUserDto.password,
           name: registerUserDto.name,
+          password: bcrypt.hashSync(registerUserDto.password, 10),
           cellPhone: registerUserDto.cellPhone,
         },
       });
-      return { user, token: user.id };
+
+      const { password: __, ...userWithoutPassword } = user;
+      return {
+        user: userWithoutPassword,
+        token: await this.signJwtToken(userWithoutPassword),
+      };
+    } catch (error) {
+      throw new RpcException({
+        status: 400,
+        message: error.message,
+      });
+    }
+  }
+  async loginUser(loginUserDto: LoginUserDto) {
+    try {
+      const { email, password } = loginUserDto;
+      const user = await this.user.findUnique({
+        where: {
+          email,
+        },
+      });
+      if (!user) {
+        throw new RpcException({
+          status: 400,
+          message: 'Invalid credentials - email',
+        });
+      }
+
+      const isPasswordValid = bcrypt.compareSync(password, user.password);
+      if (!isPasswordValid) {
+        throw new RpcException({
+          status: 400,
+          message: 'Invalid credentials - password',
+        });
+      }
+
+      const { password: __, ...userWithoutPassword } = user;
+      return {
+        user: userWithoutPassword,
+        token: await this.signJwtToken(userWithoutPassword),
+      };
     } catch (error) {
       throw new RpcException({
         status: 400,
