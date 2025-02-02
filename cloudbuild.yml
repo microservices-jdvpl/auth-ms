@@ -16,3 +16,5 @@ steps:
         "push",
         "us-east1-docker.pkg.dev/microservices-store-449702/registry-image/auth-ms-prd",
       ]
+options:
+  logging: CLOUD_LOGGING_ONLY
