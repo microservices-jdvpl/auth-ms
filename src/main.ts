@@ -22,6 +22,6 @@ async function bootstrap() {
     }),
   );
   await app.listen();
-  logger.log(`Auth MS is running`);
+  logger.log(`Auth MS is running with NATS on ${envs.NATS_SERVERS}`);
 }
 bootstrap();
